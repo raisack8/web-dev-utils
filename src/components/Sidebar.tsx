@@ -22,6 +22,11 @@ export default function Sidebar() {
       target: undefined,
     },
     {
+      label: "サンプル画像",
+      path: "/sample-image",
+      target: undefined,
+    },
+    {
       label: "MyDocs",
       path: "https://raisack8.github.io/my-skill/",
       target: "_blank",

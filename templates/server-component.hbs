@@ -1,8 +1,11 @@
-interface
-{{pascalCase name}}Props { children?: React.ReactNode; } export default function
-{{pascalCase name}}({ children }:
-{{pascalCase name}}Props) { return (
-<div>
-  {children}
-</div>
-); }
+interface {{pascalCase name}}Props {
+  children?: React.ReactNode;
+}
+
+export default function {{pascalCase name}}({ children }: {{pascalCase name}}Props) {
+  return (
+    <div>
+      {children}
+    </div>
+  );
+}
