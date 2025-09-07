@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState, useTransition } from "react"
+import { useState } from "react"
 import { Label } from "@radix-ui/react-label"
 import { RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
@@ -26,6 +26,7 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
       setIdentifier("")
       toast.success("メモを保存しました")
     } catch (error) {
+      console.warn("Save memo error:", error)
       toast.error("メモの保存に失敗しました")
     }
   }
@@ -54,6 +55,7 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
       await deleteMemo(key)
       toast.success(`削除しました`)
     } catch (error) {
+      console.warn("Delete memo error:", error)
       toast.error("メモの削除に失敗しました")
     }
   }
@@ -63,6 +65,7 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
       await updateMemoTtl(key)
       toast.success(`TTLを残り1週間に更新しました`)
     } catch (error) {
+      console.warn("Update TTL error:", error)
       toast.error("メモの更新に失敗しました")
     }
   }

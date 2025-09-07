@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { Home, Settings, Users } from "lucide-react"
 import {
   SidebarContent,
   SidebarHeader,

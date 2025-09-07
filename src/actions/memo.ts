@@ -16,10 +16,6 @@ export interface Memo {
   ttl: number // 実際のRedisのTTL値（秒）
 }
 
-// 開発環境用のインメモリストレージ（実際にはRedisを使用）
-let memoryStorage: Map<string, string> = new Map()
-let memoList: string[] = []
-
 export async function saveMemo(
   content: string,
   ttl: number,
@@ -62,7 +58,7 @@ export async function getMemos() {
       return { ...memo, id: keys[index], ttl: ttls[index] }
     })
     .filter((memo): memo is Memo & { id: string; ttl: number } => memo !== null)
-  console.log(memos)
+  // console.log(memos)
   return memos
 }
 
@@ -76,7 +72,7 @@ export async function updateMemoTtl(key: string) {
   const result = await updateCacheTtl(key, 25500)
   if (!result) {
     console.error(`Memo not found for id: ${key}`)
-    console.error("Available memo ids:", Array.from(memoryStorage.keys()))
+    // console.error("Available memo ids:", Array.from(memoryStorage.keys()))
     throw new Error("メモが見つかりません")
   }
   revalidatePath("/memo")

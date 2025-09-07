@@ -14,7 +14,7 @@ async function ensureConnection() {
   }
 }
 
-export async function setCache(key: string, value: any, ttl?: number) {
+export async function setCache(key: string, value: unknown, ttl?: number) {
   await ensureConnection()
   const serialized = JSON.stringify(value)
 
