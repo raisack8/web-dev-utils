@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Target } from "lucide-react"
 import {
   SidebarContent,
   SidebarHeader,
@@ -13,10 +14,17 @@ export default function Sidebar() {
     {
       label: "文字列",
       path: "/string",
+      target: undefined,
     },
     {
       label: "メモ",
       path: "/memo",
+      target: undefined,
+    },
+    {
+      label: "MyDocs",
+      path: "https://raisack8.github.io/my-skill/",
+      target: "_blank",
     },
   ]
   return (
@@ -31,7 +39,9 @@ export default function Sidebar() {
           {menuItems.map((x, i) => (
             <SidebarMenuItem key={i}>
               <SidebarMenuButton asChild>
-                <Link href={x.path}>{x.label}</Link>
+                <Link href={x.path} target={x.target}>
+                  {x.label}
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

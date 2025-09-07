@@ -53,10 +53,10 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
   const handleDelete = async (key: string) => {
     try {
       await deleteMemo(key)
-      toast.success(`削除しました`)
+      toast.success(` 除しました`)
     } catch (error) {
-      console.warn("Delete memo error:", error)
-      toast.error("メモの削除に失敗しました")
+      console.warn("De  ete memo error:", error)
+      toast.error("メ の削除に失敗しました")
     }
   }
 
@@ -96,14 +96,14 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
                 onChange={(e) => setTtl(Number(e.target.value))}
                 className="w-24"
               />
-              <Label className="text-xs ml-1">秒</Label>
+              <Label className="text-xs content-end ml-1">秒</Label>
             </div>
           </div>
         </form>
       </Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
+      <div className="w-full ml-1 grid md:grid-cols-2 gap-2 ">
         {memos.map((memo, i) => (
-          <Card key={i} className="p-4 relative">
+          <Card key={i} className="p-4">
             <div className="space-y-2">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
