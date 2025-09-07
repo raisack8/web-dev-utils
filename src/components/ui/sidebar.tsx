@@ -4,8 +4,6 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
-
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -16,6 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -155,37 +154,54 @@ const sidebarVariants = cva(
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> &
-    VariantProps<typeof sidebarVariants>
->(({ side = "left", variant = "sidebar", collapsible = "offcanvas", className, children, ...props }, ref) => {
-  const { state } = useSidebar()
+  React.ComponentProps<"div"> & VariantProps<typeof sidebarVariants>
+>(
+  (
+    {
+      side = "left",
+      variant = "sidebar",
+      collapsible = "offcanvas",
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const { state } = useSidebar()
 
-  if (collapsible === "none") {
+    if (collapsible === "none") {
+      return (
+        <div
+          className={cn(
+            sidebarVariants({ side, variant, collapsible: "none" }),
+            className
+          )}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </div>
+      )
+    }
+
     return (
       <div
-        className={cn(sidebarVariants({ side, variant, collapsible: "none" }), className)}
         ref={ref}
+        data-state={state}
+        data-collapsible={state === "collapsed" ? collapsible : ""}
+        data-variant={variant}
+        data-side={side}
+        className={cn(
+          sidebarVariants({ side, variant, collapsible }),
+          className
+        )}
         {...props}
       >
         {children}
       </div>
     )
   }
-
-  return (
-    <div
-      ref={ref}
-      data-state={state}
-      data-collapsible={state === "collapsed" ? collapsible : ""}
-      data-variant={variant}
-      data-side={side}
-      className={cn(sidebarVariants({ side, variant, collapsible }), className)}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-})
+)
 Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef<
@@ -589,7 +605,10 @@ const SidebarMenuSkeleton = React.forwardRef<
       {...props}
     >
       {showIcon && (
-        <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />
+        <Skeleton
+          className="size-4 rounded-md"
+          data-sidebar="menu-skeleton-icon"
+        />
       )}
       <Skeleton
         className="h-4 flex-1 max-w-[--skeleton-width]"

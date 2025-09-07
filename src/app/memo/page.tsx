@@ -1,7 +1,13 @@
-export default function Page() {
+"use server"
+
+import { getMemos } from "@/actions/memo"
+import MemoArea from "@/components/app/memo/MemoArea"
+
+export default async function Page() {
+  const memos = await getMemos()
   return (
-    <div className="p-8">
-      <p>This is the  page.</p>
-    </div>
-  );
+    <>
+      <MemoArea memos={memos} />
+    </>
+  )
 }

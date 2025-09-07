@@ -1,22 +1,25 @@
+import Link from "next/link"
+import { Home, Settings, Users } from "lucide-react"
 import {
-  Sidebar as SidebarPrimitive,
   SidebarContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { Home, Settings, Users } from "lucide-react";
-import Link from "next/link";
+  SidebarMenuItem,
+  Sidebar as SidebarPrimitive,
+} from "@/components/ui/sidebar"
 
 export default function Sidebar() {
-  const menuItems = [{
-    "label":"文字列",
-    "path":"/string"
-  },{
-    "label":"メモ",
-    "path":"/memo" 
-  }]
+  const menuItems = [
+    {
+      label: "文字列",
+      path: "/string",
+    },
+    {
+      label: "メモ",
+      path: "/memo",
+    },
+  ]
   return (
     <SidebarPrimitive>
       <SidebarHeader>
@@ -26,17 +29,15 @@ export default function Sidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((x,i)=>(
-          <SidebarMenuItem key={i}>
-            <SidebarMenuButton asChild>
-              <Link href={x.path}>
-                {x.label}
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {menuItems.map((x, i) => (
+            <SidebarMenuItem key={i}>
+              <SidebarMenuButton asChild>
+                <Link href={x.path}>{x.label}</Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
     </SidebarPrimitive>
-  );
+  )
 }
