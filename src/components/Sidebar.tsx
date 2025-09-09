@@ -9,29 +9,9 @@ import {
   Sidebar as SidebarPrimitive,
 } from "@/components/ui/sidebar"
 
+import { navigationItems } from "@/data/navigation"
+
 export default function Sidebar() {
-  const menuItems = [
-    {
-      label: "文字列",
-      path: "/string",
-      target: undefined,
-    },
-    {
-      label: "メモ",
-      path: "/memo",
-      target: undefined,
-    },
-    {
-      label: "サンプル画像",
-      path: "/sample-image",
-      target: undefined,
-    },
-    {
-      label: "MyDocs",
-      path: "https://raisack8.github.io/my-skill/",
-      target: "_blank",
-    },
-  ]
   return (
     <SidebarPrimitive>
       <SidebarHeader>
@@ -41,7 +21,7 @@ export default function Sidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((x, i) => (
+          {navigationItems.map((x, i) => (
             <SidebarMenuItem key={i}>
               <SidebarMenuButton asChild>
                 <Link href={x.path} target={x.target}>

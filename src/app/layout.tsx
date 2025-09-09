@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import Sidebar from "@/components/Sidebar"
+import MobileMenuBar from "@/components/MobileMenuBar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <SidebarProvider>
           <Sidebar />
+          <MobileMenuBar />
           <main className="flex-1 p-8">{children}</main>
           <Toaster position="top-center" richColors />
         </SidebarProvider>
