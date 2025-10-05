@@ -8,8 +8,8 @@ import {
   SidebarMenuItem,
   Sidebar as SidebarPrimitive,
 } from "@/components/ui/sidebar"
-
 import { navigationItems } from "@/data/navigation"
+import { ModeToggle } from "./mode-toggle"
 
 export default function Sidebar() {
   return (
@@ -18,6 +18,7 @@ export default function Sidebar() {
         <h2 className="text-lg font-semibold px-4 py-2">
           <Link href="/">Web Dev Utils</Link>
         </h2>
+        <ModeToggle />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

@@ -125,7 +125,7 @@ function SidebarProvider({
 }
 
 const sidebarVariants = cva(
-  "group peer hidden md:flex h-full w-[--sidebar-width] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+  "group peer hidden md:flex min-h-svh w-[--sidebar-width] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
   {
     variants: {
       variant: {

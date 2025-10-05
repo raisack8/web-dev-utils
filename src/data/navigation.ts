@@ -21,6 +21,11 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
+    label: "Redis",
+    path: "/redis",
+    target: undefined,
+  },
+  {
     label: "MyDocs",
     path: "https://raisack8.github.io/my-skill/",
     target: "_blank",

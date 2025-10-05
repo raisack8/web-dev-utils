@@ -1,6 +1,6 @@
 import { Suspense } from "react"
-import { getMemos } from "@/actions/memo"
 import MemoArea from "@/components/app/memo/MemoArea"
+import { getMemos } from "@/lib/action/memo"
 
 export default async function Page() {
   const memos = await getMemos()

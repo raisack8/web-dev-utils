@@ -1,12 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import {
-  deleteCache,
-  getCacheByPrefix,
-  setCache,
-  updateCacheTtl,
-} from "@/lib/redis"
+import { del, get, getTTL, keys, setJSON } from "@/lib/redis/string"
 
 export interface Memo {
   id: string
@@ -38,41 +33,53 @@ export async function saveMemo(
     content,
     createdAt: new Date().toISOString(),
   }
-  await setCache(key, memo, ttl)
+  await setJSON(key, memo, ttl)
   revalidatePath("/memo")
   return memo
 }
 
 export async function getMemos() {
-  // メモの詳細を取得
-  const { keys, values, ttls } = await getCacheByPrefix("memo:*")
-  const memos = values
-    .map((jsonStr, index) => {
+  // パターンに一致するすべてのキーを取得
+  const allKeys = await keys("memo:*")
+
+  if (allKeys.length === 0) {
+    return []
+  }
+
+  // 各キーの値とTTLを並行取得
+  const memos = await Promise.all(
+    allKeys.map(async (key) => {
+      const jsonStr = await get(key)
+      const ttl = await getTTL(key)
+
       if (!jsonStr) return null
+
       const parsed = JSON.parse(jsonStr)
       const memo =
         typeof parsed === "string"
           ? (JSON.parse(parsed) as Memo)
           : (parsed as Memo)
+
       // キーとTTLを追加
-      return { ...memo, id: keys[index], ttl: ttls[index] }
+      return { ...memo, id: key, ttl }
     })
-    .filter((memo): memo is Memo & { id: string; ttl: number } => memo !== null)
-  // console.log(memos)
-  return memos
+  )
+
+  return memos.filter(
+    (memo): memo is Memo & { id: string; ttl: number } => memo !== null
+  )
 }
 
 export async function deleteMemo(key: string) {
-  await deleteCache(key)
+  await del(key)
   revalidatePath("/memo")
   return { success: true }
 }
 
-export async function updateMemoTtl(key: string) {
-  const result = await updateCacheTtl(key, 25500)
+export async function updateMemoTtl(key: string, value: string) {
+  const result = await setJSON(key, JSON.parse(value), 25500)
   if (!result) {
     console.error(`Memo not found for id: ${key}`)
-    // console.error("Available memo ids:", Array.from(memoryStorage.keys()))
     throw new Error("メモが見つかりません")
   }
   revalidatePath("/memo")

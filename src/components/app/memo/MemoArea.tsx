@@ -4,11 +4,16 @@ import { useState } from "react"
 import { Label } from "@radix-ui/react-label"
 import { RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { deleteMemo, saveMemo, updateMemoTtl, type Memo } from "@/actions/memo"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  deleteMemo,
+  saveMemo,
+  updateMemoTtl,
+  type Memo,
+} from "@/lib/action/memo"
 
 export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
   const [content, setContent] = useState("")
@@ -62,7 +67,17 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
 
   const handleUpdateTtl = async (key: string) => {
     try {
-      await updateMemoTtl(key)
+      const memo = memos.find((m) => m.id === key)
+      if (!memo) {
+        toast.error("メモが見つかりません")
+        return
+      }
+      const memoData = {
+        randomId: memo.randomId,
+        content: memo.content,
+        createdAt: memo.createdAt,
+      }
+      await updateMemoTtl(key, JSON.stringify(memoData))
       toast.success(`TTLを残り1週間に更新しました`)
     } catch (error) {
       console.warn("Update TTL error:", error)

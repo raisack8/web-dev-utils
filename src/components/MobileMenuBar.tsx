@@ -19,8 +19,8 @@ export default function MobileMenuBar() {
           <MenubarContent align="end">
             {navigationItems.map((item, index) => (
               <MenubarItem key={index} asChild>
-                <Link 
-                  href={item.path} 
+                <Link
+                  href={item.path}
                   target={item.target}
                   className="flex items-center"
                 >
