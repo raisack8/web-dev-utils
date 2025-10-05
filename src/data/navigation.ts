@@ -21,13 +21,18 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
-    label: "Redis",
-    path: "/redis",
+    label: "認証",
+    path: "/auth",
     target: undefined,
   },
   {
-    label: "認証",
-    path: "/auth",
+    label: "パフォーマンス",
+    path: "/performance",
+    target: undefined,
+  },
+  {
+    label: "Redis",
+    path: "/redis",
     target: undefined,
   },
   {
