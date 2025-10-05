@@ -13,7 +13,7 @@ import { ModeToggle } from "./mode-toggle"
 
 export default function Sidebar() {
   return (
-    <SidebarPrimitive>
+    <SidebarPrimitive className="w-[14rem] ps-4">
       <SidebarHeader>
         <h2 className="text-lg font-semibold px-4 py-2">
           <Link href="/">Web Dev Utils</Link>
