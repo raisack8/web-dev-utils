@@ -26,6 +26,11 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
+    label: "認証",
+    path: "/auth",
+    target: undefined,
+  },
+  {
     label: "MyDocs",
     path: "https://raisack8.github.io/my-skill/",
     target: "_blank",
