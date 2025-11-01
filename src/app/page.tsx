@@ -39,6 +39,11 @@ export default function Page() {
       url: "https://resend.com/docs/dashboard/emails/introduction",
       icon: "/icons/resend.png",
     },
+    {
+      name: "Upstash",
+      url: "https://console.upstash.com/redis",
+      icon: "/icons/upstash.png",
+    },
   ]
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
