@@ -20,9 +20,9 @@ export default function Page() {
       icon: "/icons/shadcn.ico",
     },
     {
-      name: "NextAuth.js",
-      url: "https://next-auth.js.org/",
-      icon: "/icons/nextauth.ico",
+      name: "Auth.js",
+      url: "https://authjs.dev/getting-started",
+      icon: "/icons/authjs.png",
     },
     {
       name: "Supabase Auth",
@@ -33,6 +33,11 @@ export default function Page() {
       name: "Claude Code",
       url: "https://docs.claude.com/en/docs/claude-code/overview",
       icon: "/icons/claude.ico",
+    },
+    {
+      name: "Resend",
+      url: "https://resend.com/docs/dashboard/emails/introduction",
+      icon: "/icons/resend.png",
     },
   ]
   return (
