@@ -58,10 +58,10 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
   const handleDelete = async (key: string) => {
     try {
       await deleteMemo(key)
-      toast.success(` 除しました`)
+      toast.success(`削除しました`)
     } catch (error) {
-      console.warn("De  ete memo error:", error)
-      toast.error("メ の削除に失敗しました")
+      console.warn("Delete memo error:", error)
+      toast.error("メモの削除に失敗しました")
     }
   }
 
