@@ -1,8 +1,9 @@
-import { ensureConnection, redis } from "./client"
+import { ensureConnection, redis, withNamespace } from "./client"
 
 /**
  * Redis Hash型操作のヘルパー関数群
  * Hashはフィールドと値のペアを持つマップ構造（オブジェクトのような構造）
+ * キーは共有Redis上で衝突しないよう内部で自動的に名前空間化されます
  */
 
 // ==================== 基本操作 ====================
@@ -20,7 +21,7 @@ export async function hSet(
   value: string | number
 ): Promise<number> {
   await ensureConnection()
-  return await redis.hSet(key, field, value)
+  return await redis.hSet(withNamespace(key), field, value)
 }
 
 /**
@@ -33,7 +34,7 @@ export async function hGet(
   field: string
 ): Promise<string | undefined> {
   await ensureConnection()
-  const result = await redis.hGet(key, field)
+  const result = await redis.hGet(withNamespace(key), field)
   return result ?? undefined
 }
 
@@ -47,7 +48,7 @@ export async function hMSet(
   data: Record<string, string | number>
 ): Promise<number> {
   await ensureConnection()
-  return await redis.hSet(key, data)
+  return await redis.hSet(withNamespace(key), data)
 }
 
 /**
@@ -60,7 +61,7 @@ export async function hMGet(
   fields: string[]
 ): Promise<(string | undefined)[]> {
   await ensureConnection()
-  const results = await redis.hmGet(key, fields)
+  const results = await redis.hmGet(withNamespace(key), fields)
   return results.map((r) => r ?? undefined)
 }
 
@@ -72,7 +73,7 @@ export async function hMGet(
  */
 export async function hGetAll(key: string): Promise<Record<string, string>> {
   await ensureConnection()
-  return await redis.hGetAll(key)
+  return await redis.hGetAll(withNamespace(key))
 }
 
 /**
@@ -84,7 +85,7 @@ export async function hGetAll(key: string): Promise<Record<string, string>> {
  */
 export async function hDel(key: string, ...fields: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.hDel(key, fields)
+  return await redis.hDel(withNamespace(key), fields)
 }
 
 /**
@@ -94,7 +95,7 @@ export async function hDel(key: string, ...fields: string[]): Promise<number> {
  */
 export async function hExists(key: string, field: string): Promise<boolean> {
   await ensureConnection()
-  const result = await redis.hExists(key, field)
+  const result = await redis.hExists(withNamespace(key), field)
   return result === 1
 }
 
@@ -105,7 +106,7 @@ export async function hExists(key: string, field: string): Promise<boolean> {
  */
 export async function hLen(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.hLen(key)
+  return await redis.hLen(withNamespace(key))
 }
 
 /**
@@ -115,7 +116,7 @@ export async function hLen(key: string): Promise<number> {
  */
 export async function hKeys(key: string): Promise<string[]> {
   await ensureConnection()
-  return await redis.hKeys(key)
+  return await redis.hKeys(withNamespace(key))
 }
 
 /**
@@ -125,7 +126,7 @@ export async function hKeys(key: string): Promise<string[]> {
  */
 export async function hVals(key: string): Promise<string[]> {
   await ensureConnection()
-  return await redis.hVals(key)
+  return await redis.hVals(withNamespace(key))
 }
 
 // ==================== 数値操作 ====================
@@ -143,7 +144,7 @@ export async function hIncrBy(
   increment: number
 ): Promise<number> {
   await ensureConnection()
-  return await redis.hIncrBy(key, field, increment)
+  return await redis.hIncrBy(withNamespace(key), field, increment)
 }
 
 /**
@@ -158,7 +159,7 @@ export async function hIncrByFloat(
   increment: number
 ): Promise<string> {
   await ensureConnection()
-  return await redis.hIncrByFloat(key, field, increment)
+  return await redis.hIncrByFloat(withNamespace(key), field, increment)
 }
 
 // ==================== 条件付き操作 ====================
@@ -176,13 +177,13 @@ export async function hSetNX(
   value: string
 ): Promise<boolean> {
   await ensureConnection()
-  const result = await redis.hSetNX(key, field, value)
+  const result = await redis.hSetNX(withNamespace(key), field, value)
   return result === 1
 }
 
 // ==================== スキャン操作 ====================
 // Note: hScan, hRandField などの高度な操作は Redis の型定義によっては
-// 直接 redis.hScan() などを使用してください
+// 直接 redis.hScan() などを使用してください（キーは withNamespace() を通すこと）
 
 // ==================== JSON操作（型安全） ====================
 
@@ -200,7 +201,7 @@ export async function hGetAllTyped<T extends Record<string, string>>(
   key: string
 ): Promise<T> {
   await ensureConnection()
-  return (await redis.hGetAll(key)) as T
+  return (await redis.hGetAll(withNamespace(key))) as T
 }
 
 /**
@@ -221,7 +222,7 @@ export async function hSetObject(
   for (const [k, v] of Object.entries(obj)) {
     data[k] = String(v)
   }
-  return await redis.hSet(key, data)
+  return await redis.hSet(withNamespace(key), data)
 }
 
 /**
@@ -235,7 +236,7 @@ export async function hSetJSON<T>(
   value: T
 ): Promise<number> {
   await ensureConnection()
-  return await redis.hSet(key, field, JSON.stringify(value))
+  return await redis.hSet(withNamespace(key), field, JSON.stringify(value))
 }
 
 /**
@@ -251,7 +252,7 @@ export async function hGetJSON<T>(
   field: string
 ): Promise<T | null> {
   await ensureConnection()
-  const result = await redis.hGet(key, field)
+  const result = await redis.hGet(withNamespace(key), field)
   return result ? JSON.parse(result) : null
 }
 
@@ -265,6 +266,6 @@ export async function hGetJSON<T>(
  */
 export async function hStrLen(key: string, field: string): Promise<number> {
   await ensureConnection()
-  const result = await redis.hStrLen(key, field)
+  const result = await redis.hStrLen(withNamespace(key), field)
   return typeof result === "number" ? result : 0
 }

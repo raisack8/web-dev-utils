@@ -1,8 +1,14 @@
-import { ensureConnection, redis } from "./client"
+import {
+  ensureConnection,
+  redis,
+  stripNamespace,
+  withNamespace,
+} from "./client"
 
 /**
  * Redis Sorted Set型操作のヘルパー関数群
  * Sorted Setはスコア付きの順序付き集合（ランキングやリーダーボードに最適）
+ * キーは共有Redis上で衝突しないよう内部で自動的に名前空間化されます
  */
 
 // ==================== 基本操作 ====================
@@ -22,7 +28,7 @@ export async function zAdd(
   members: { score: number; value: string } | { score: number; value: string }[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zAdd(key, members)
+  return await redis.zAdd(withNamespace(key), members)
 }
 
 /**
@@ -33,7 +39,7 @@ export async function zAdd(
  */
 export async function zRem(key: string, ...members: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.zRem(key, members)
+  return await redis.zRem(withNamespace(key), members)
 }
 
 /**
@@ -46,7 +52,7 @@ export async function zScore(
   member: string
 ): Promise<number | null> {
   await ensureConnection()
-  return await redis.zScore(key, member)
+  return await redis.zScore(withNamespace(key), member)
 }
 
 /**
@@ -59,7 +65,7 @@ export async function zRank(
   member: string
 ): Promise<number | null> {
   await ensureConnection()
-  return await redis.zRank(key, member)
+  return await redis.zRank(withNamespace(key), member)
 }
 
 /**
@@ -72,7 +78,7 @@ export async function zRevRank(
   member: string
 ): Promise<number | null> {
   await ensureConnection()
-  return await redis.zRevRank(key, member)
+  return await redis.zRevRank(withNamespace(key), member)
 }
 
 /**
@@ -82,7 +88,7 @@ export async function zRevRank(
  */
 export async function zCard(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.zCard(key)
+  return await redis.zCard(withNamespace(key))
 }
 
 /**
@@ -96,7 +102,7 @@ export async function zCount(
   max: number | string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zCount(key, min, max)
+  return await redis.zCount(withNamespace(key), min, max)
 }
 
 // ==================== 範囲取得 ====================
@@ -112,7 +118,7 @@ export async function zRange(
   stop: number
 ): Promise<string[]> {
   await ensureConnection()
-  const result = await redis.zRange(key, start, stop)
+  const result = await redis.zRange(withNamespace(key), start, stop)
   return Array.isArray(result) ? result : []
 }
 
@@ -128,7 +134,7 @@ export async function zRangeWithScores(
   stop: number
 ): Promise<{ value: string; score: number }[]> {
   await ensureConnection()
-  const result = await redis.zRangeWithScores(key, start, stop)
+  const result = await redis.zRangeWithScores(withNamespace(key), start, stop)
   return Array.isArray(result) ? result : []
 }
 
@@ -143,7 +149,7 @@ export async function zRevRange(
   stop: number
 ): Promise<string[]> {
   await ensureConnection()
-  const result = await redis.zRevRange(key, start, stop)
+  const result = await redis.zRevRange(withNamespace(key), start, stop)
   return (Array.isArray(result) ? result : []) as string[]
 }
 
@@ -158,7 +164,11 @@ export async function zRevRangeWithScores(
   stop: number
 ): Promise<{ value: string; score: number }[]> {
   await ensureConnection()
-  const result = await redis.zRevRangeWithScores(key, start, stop)
+  const result = await redis.zRevRangeWithScores(
+    withNamespace(key),
+    start,
+    stop
+  )
   return (Array.isArray(result) ? result : []) as {
     value: string
     score: number
@@ -177,7 +187,7 @@ export async function zRangeByScore(
   max: number | string
 ): Promise<string[]> {
   await ensureConnection()
-  const result = await redis.zRangeByScore(key, min, max)
+  const result = await redis.zRangeByScore(withNamespace(key), min, max)
   return Array.isArray(result) ? result : []
 }
 
@@ -192,7 +202,7 @@ export async function zRangeByScoreWithScores(
   max: number | string
 ): Promise<{ value: string; score: number }[]> {
   await ensureConnection()
-  return await redis.zRangeByScoreWithScores(key, min, max)
+  return await redis.zRangeByScoreWithScores(withNamespace(key), min, max)
 }
 
 /**
@@ -206,7 +216,7 @@ export async function zRevRangeByScore(
   min: number | string
 ): Promise<string[]> {
   await ensureConnection()
-  const result = await redis.zRevRangeByScore(key, max, min)
+  const result = await redis.zRevRangeByScore(withNamespace(key), max, min)
   return (Array.isArray(result) ? result : []) as string[]
 }
 
@@ -224,7 +234,7 @@ export async function zIncrBy(
   member: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zIncrBy(key, increment, member)
+  return await redis.zIncrBy(withNamespace(key), increment, member)
 }
 
 // ==================== 削除操作 ====================
@@ -241,7 +251,7 @@ export async function zRemRangeByRank(
   stop: number
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zRemRangeByRank(key, start, stop)
+  return await redis.zRemRangeByRank(withNamespace(key), start, stop)
 }
 
 /**
@@ -256,7 +266,7 @@ export async function zRemRangeByScore(
   max: number | string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zRemRangeByScore(key, min, max)
+  return await redis.zRemRangeByScore(withNamespace(key), min, max)
 }
 
 /**
@@ -270,7 +280,7 @@ export async function zRemRangeByLex(
   max: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zRemRangeByLex(key, min, max)
+  return await redis.zRemRangeByLex(withNamespace(key), min, max)
 }
 
 // ==================== POP操作 ====================
@@ -289,11 +299,12 @@ export async function zPopMin(
   { value: string; score: number } | { value: string; score: number }[] | null
 > {
   await ensureConnection()
+  const namespacedKey = withNamespace(key)
   if (count === undefined) {
-    const result = await redis.zPopMin(key)
+    const result = await redis.zPopMin(namespacedKey)
     return result
   }
-  const results = await redis.zPopMinCount(key, count)
+  const results = await redis.zPopMinCount(namespacedKey, count)
   return results
 }
 
@@ -311,11 +322,12 @@ export async function zPopMax(
   { value: string; score: number } | { value: string; score: number }[] | null
 > {
   await ensureConnection()
+  const namespacedKey = withNamespace(key)
   if (count === undefined) {
-    const result = await redis.zPopMax(key)
+    const result = await redis.zPopMax(namespacedKey)
     return result
   }
-  const results = await redis.zPopMaxCount(key, count)
+  const results = await redis.zPopMaxCount(namespacedKey, count)
   return results
 }
 
@@ -330,7 +342,8 @@ export async function bzPopMin(
   timeout: number
 ): Promise<{ key: string; value: string; score: number } | null> {
   await ensureConnection()
-  return await redis.bzPopMin(keys, timeout)
+  const result = await redis.bzPopMin(keys.map(withNamespace), timeout)
+  return result ? { ...result, key: stripNamespace(result.key) } : null
 }
 
 /**
@@ -342,17 +355,18 @@ export async function bzPopMax(
   timeout: number
 ): Promise<{ key: string; value: string; score: number } | null> {
   await ensureConnection()
-  return await redis.bzPopMax(keys, timeout)
+  const result = await redis.bzPopMax(keys.map(withNamespace), timeout)
+  return result ? { ...result, key: stripNamespace(result.key) } : null
 }
 
 // ==================== 集合演算 ====================
 
 // ==================== 集合演算 ====================
 // Note: zUnionStore, zInterStore などの集合演算は複雑な型定義のため
-// 直接 redis.zUnionStore() などを使用してください
+// 直接 redis.zUnionStore() などを使用してください（キーは withNamespace() を通すこと）
 
 // ==================== スキャン操作 ====================
-// Note: zScan などは Redis の型定義によっては直接使用してください
+// Note: zScan などは Redis の型定義によっては直接使用してください（キーは withNamespace() を通すこと）
 
 // ==================== 辞書順操作 ====================
 
@@ -367,7 +381,7 @@ export async function zLexCount(
   max: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.zLexCount(key, min, max)
+  return await redis.zLexCount(withNamespace(key), min, max)
 }
 
 /**
@@ -381,13 +395,13 @@ export async function zRangeByLex(
   max: string
 ): Promise<string[]> {
   await ensureConnection()
-  return await redis.zRangeByLex(key, min, max)
+  return await redis.zRangeByLex(withNamespace(key), min, max)
 }
 
 // ==================== ランダム操作 ====================
 
 // ==================== ランダム操作 ====================
-// Note: zRandMember などは Redis の型定義によっては直接使用してください
+// Note: zRandMember などは Redis の型定義によっては直接使用してください（キーは withNamespace() を通すこと）
 
 // ==================== ユーティリティ ====================
 
@@ -401,7 +415,7 @@ export async function zGetTopN(
   n: number
 ): Promise<{ value: string; score: number }[]> {
   await ensureConnection()
-  const result = await redis.zRevRangeWithScores(key, 0, n - 1)
+  const result = await redis.zRevRangeWithScores(withNamespace(key), 0, n - 1)
   return (Array.isArray(result) ? result : []) as {
     value: string
     score: number
@@ -418,7 +432,7 @@ export async function zGetBottomN(
   n: number
 ): Promise<{ value: string; score: number }[]> {
   await ensureConnection()
-  return await redis.zRangeWithScores(key, 0, n - 1)
+  return await redis.zRangeWithScores(withNamespace(key), 0, n - 1)
 }
 
 /**
@@ -432,10 +446,11 @@ export async function zGetMemberInfo(
   member: string
 ): Promise<{ rank: number; score: number; total: number } | null> {
   await ensureConnection()
+  const namespacedKey = withNamespace(key)
   const [rank, score, total] = await Promise.all([
-    redis.zRevRank(key, member),
-    redis.zScore(key, member),
-    redis.zCard(key),
+    redis.zRevRank(namespacedKey, member),
+    redis.zScore(namespacedKey, member),
+    redis.zCard(namespacedKey),
   ])
 
   if (rank === null || score === null) return null

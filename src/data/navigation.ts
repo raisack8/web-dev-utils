@@ -36,6 +36,11 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
+    label: "ファイル",
+    path: "/blob",
+    target: undefined,
+  },
+  {
     label: "MyDocs",
     path: "https://raisack8.github.io/my-skill/",
     target: "_blank",

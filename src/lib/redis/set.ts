@@ -1,8 +1,9 @@
-import { ensureConnection, redis } from "./client"
+import { ensureConnection, redis, withNamespace } from "./client"
 
 /**
  * Redis Set型操作のヘルパー関数群
  * Setは重複のない文字列の集合で、集合演算（和・差・積）をサポート
+ * キーは共有Redis上で衝突しないよう内部で自動的に名前空間化されます
  */
 
 // ==================== 基本操作 ====================
@@ -16,7 +17,7 @@ import { ensureConnection, redis } from "./client"
  */
 export async function sAdd(key: string, ...members: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.sAdd(key, members)
+  return await redis.sAdd(withNamespace(key), members)
 }
 
 /**
@@ -27,7 +28,7 @@ export async function sAdd(key: string, ...members: string[]): Promise<number> {
  */
 export async function sRem(key: string, ...members: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.sRem(key, members)
+  return await redis.sRem(withNamespace(key), members)
 }
 
 /**
@@ -37,7 +38,7 @@ export async function sRem(key: string, ...members: string[]): Promise<number> {
  */
 export async function sMembers(key: string): Promise<string[]> {
   await ensureConnection()
-  return await redis.sMembers(key)
+  return await redis.sMembers(withNamespace(key))
 }
 
 /**
@@ -47,7 +48,7 @@ export async function sMembers(key: string): Promise<string[]> {
  */
 export async function sIsMember(key: string, member: string): Promise<boolean> {
   await ensureConnection()
-  const result = await redis.sIsMember(key, member)
+  const result = await redis.sIsMember(withNamespace(key), member)
   return result === 1
 }
 
@@ -63,7 +64,7 @@ export async function sMIsMember(
   members: string[]
 ): Promise<boolean[]> {
   await ensureConnection()
-  const results = await redis.smIsMember(key, members)
+  const results = await redis.smIsMember(withNamespace(key), members)
   return results.map((r) => r === 1)
 }
 
@@ -74,7 +75,7 @@ export async function sMIsMember(
  */
 export async function sCard(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.sCard(key)
+  return await redis.sCard(withNamespace(key))
 }
 
 /**
@@ -90,10 +91,10 @@ export async function sRandMember(
 ): Promise<string | string[] | null> {
   await ensureConnection()
   if (count === undefined) {
-    const result = await redis.sRandMember(key)
+    const result = await redis.sRandMember(withNamespace(key))
     return result
   }
-  const results = await redis.sRandMemberCount(key, count)
+  const results = await redis.sRandMemberCount(withNamespace(key), count)
   return results
 }
 
@@ -110,10 +111,10 @@ export async function sPop(
 ): Promise<string | string[] | null> {
   await ensureConnection()
   if (count === undefined) {
-    const result = await redis.sPop(key)
+    const result = await redis.sPop(withNamespace(key))
     return result
   }
-  const results = await redis.sPopCount(key, count)
+  const results = await redis.sPopCount(withNamespace(key), count)
   return results
 }
 
@@ -129,7 +130,11 @@ export async function sMove(
   member: string
 ): Promise<boolean> {
   await ensureConnection()
-  const result = await redis.sMove(source, destination, member)
+  const result = await redis.sMove(
+    withNamespace(source),
+    withNamespace(destination),
+    member
+  )
   return result === 1
 }
 
@@ -144,7 +149,7 @@ export async function sMove(
  */
 export async function sUnion(keys: string[]): Promise<string[]> {
   await ensureConnection()
-  return await redis.sUnion(keys)
+  return await redis.sUnion(keys.map(withNamespace))
 }
 
 /**
@@ -158,7 +163,10 @@ export async function sUnionStore(
   keys: string[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.sUnionStore(destination, keys)
+  return await redis.sUnionStore(
+    withNamespace(destination),
+    keys.map(withNamespace)
+  )
 }
 
 /**
@@ -170,7 +178,7 @@ export async function sUnionStore(
  */
 export async function sInter(keys: string[]): Promise<string[]> {
   await ensureConnection()
-  return await redis.sInter(keys)
+  return await redis.sInter(keys.map(withNamespace))
 }
 
 /**
@@ -184,7 +192,10 @@ export async function sInterStore(
   keys: string[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.sInterStore(destination, keys)
+  return await redis.sInterStore(
+    withNamespace(destination),
+    keys.map(withNamespace)
+  )
 }
 
 /**
@@ -197,10 +208,11 @@ export async function sInterCard(
   limit?: number
 ): Promise<number> {
   await ensureConnection()
+  const namespacedKeys = keys.map(withNamespace)
   if (limit !== undefined) {
-    return await redis.sInterCard(keys, limit)
+    return await redis.sInterCard(namespacedKeys, limit)
   }
-  return await redis.sInterCard(keys)
+  return await redis.sInterCard(namespacedKeys)
 }
 
 /**
@@ -212,7 +224,7 @@ export async function sInterCard(
  */
 export async function sDiff(keys: string[]): Promise<string[]> {
   await ensureConnection()
-  return await redis.sDiff(keys)
+  return await redis.sDiff(keys.map(withNamespace))
 }
 
 /**
@@ -226,14 +238,15 @@ export async function sDiffStore(
   keys: string[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.sDiffStore(destination, keys)
+  return await redis.sDiffStore(
+    withNamespace(destination),
+    keys.map(withNamespace)
+  )
 }
 
 // ==================== スキャン操作 ====================
-
-// ==================== スキャン操作 ====================
 // Note: sScan などの高度な操作は Redis の型定義によっては
-// 直接 redis.sScan() などを使用してください
+// 直接 redis.sScan() などを使用してください（キーは withNamespace() を通すこと）
 
 // ==================== JSON操作（シリアライズ） ====================
 
@@ -248,7 +261,7 @@ export async function sAddJSON<T>(
 ): Promise<number> {
   await ensureConnection()
   const serialized = values.map((v) => JSON.stringify(v))
-  return await redis.sAdd(key, serialized)
+  return await redis.sAdd(withNamespace(key), serialized)
 }
 
 /**
@@ -258,7 +271,7 @@ export async function sAddJSON<T>(
  */
 export async function sMembersJSON<T>(key: string): Promise<T[]> {
   await ensureConnection()
-  const members = await redis.sMembers(key)
+  const members = await redis.sMembers(withNamespace(key))
   return members.map((m) => JSON.parse(m))
 }
 
@@ -273,7 +286,7 @@ export async function sIsMemberJSON<T>(
 ): Promise<boolean> {
   await ensureConnection()
   const serialized = JSON.stringify(value)
-  const result = await redis.sIsMember(key, serialized)
+  const result = await redis.sIsMember(withNamespace(key), serialized)
   return result === 1
 }
 
@@ -288,7 +301,7 @@ export async function sRemJSON<T>(
 ): Promise<number> {
   await ensureConnection()
   const serialized = values.map((v) => JSON.stringify(v))
-  return await redis.sRem(key, serialized)
+  return await redis.sRem(withNamespace(key), serialized)
 }
 
 /**
@@ -298,7 +311,7 @@ export async function sRemJSON<T>(
  */
 export async function sPopJSON<T>(key: string): Promise<T | null> {
   await ensureConnection()
-  const result = await redis.sPop(key)
+  const result = await redis.sPop(withNamespace(key))
   return result ? JSON.parse(result) : null
 }
 
@@ -311,7 +324,7 @@ export async function sPopJSON<T>(key: string): Promise<T | null> {
  */
 export async function sIsEmpty(key: string): Promise<boolean> {
   await ensureConnection()
-  const count = await redis.sCard(key)
+  const count = await redis.sCard(withNamespace(key))
   return count === 0
 }
 
@@ -325,7 +338,10 @@ export async function sHasIntersection(
   key2: string
 ): Promise<boolean> {
   await ensureConnection()
-  const count = await redis.sInterCard([key1, key2])
+  const count = await redis.sInterCard([
+    withNamespace(key1),
+    withNamespace(key2),
+  ])
   return count > 0
 }
 
@@ -336,7 +352,8 @@ export async function sHasIntersection(
  */
 export async function sClear(key: string): Promise<number> {
   await ensureConnection()
-  const members = await redis.sMembers(key)
+  const namespacedKey = withNamespace(key)
+  const members = await redis.sMembers(namespacedKey)
   if (members.length === 0) return 0
-  return await redis.sRem(key, members)
+  return await redis.sRem(namespacedKey, members)
 }

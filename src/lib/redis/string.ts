@@ -1,8 +1,14 @@
-import { ensureConnection, redis } from "./client"
+import {
+  ensureConnection,
+  redis,
+  stripNamespace,
+  withNamespace,
+} from "./client"
 
 /**
  * Redis String型操作のヘルパー関数群
  * すべての関数は自動的に接続を確立します
+ * キーは共有Redis上で衝突しないよう内部で自動的に名前空間化されます
  */
 
 // ==================== 基本操作 ====================
@@ -20,9 +26,9 @@ export async function set(
 ): Promise<string | null> {
   await ensureConnection()
   if (ttl) {
-    return await redis.setEx(key, ttl, value)
+    return await redis.setEx(withNamespace(key), ttl, value)
   }
-  return await redis.set(key, value)
+  return await redis.set(withNamespace(key), value)
 }
 
 /**
@@ -32,7 +38,7 @@ export async function set(
  */
 export async function get(key: string): Promise<string | null> {
   await ensureConnection()
-  return await redis.get(key)
+  return await redis.get(withNamespace(key))
 }
 
 /**
@@ -42,7 +48,7 @@ export async function get(key: string): Promise<string | null> {
  */
 export async function mGet(keys: string[]): Promise<(string | null)[]> {
   await ensureConnection()
-  return await redis.mGet(keys)
+  return await redis.mGet(keys.map(withNamespace))
 }
 
 /**
@@ -52,7 +58,11 @@ export async function mGet(keys: string[]): Promise<(string | null)[]> {
  */
 export async function mSet(keyValues: Record<string, string>): Promise<string> {
   await ensureConnection()
-  return await redis.mSet(keyValues)
+  const namespaced: Record<string, string> = {}
+  for (const [key, value] of Object.entries(keyValues)) {
+    namespaced[withNamespace(key)] = value
+  }
+  return await redis.mSet(namespaced)
 }
 
 /**
@@ -63,7 +73,7 @@ export async function mSet(keyValues: Record<string, string>): Promise<string> {
  */
 export async function setNX(key: string, value: string): Promise<boolean> {
   await ensureConnection()
-  const result = await redis.setNX(key, value)
+  const result = await redis.setNX(withNamespace(key), value)
   return result === 1
 }
 
@@ -76,7 +86,7 @@ export async function setNX(key: string, value: string): Promise<boolean> {
  */
 export async function append(key: string, value: string): Promise<number> {
   await ensureConnection()
-  return await redis.append(key, value)
+  return await redis.append(withNamespace(key), value)
 }
 
 /**
@@ -87,7 +97,7 @@ export async function append(key: string, value: string): Promise<number> {
  */
 export async function strLen(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.strLen(key)
+  return await redis.strLen(withNamespace(key))
 }
 
 /**
@@ -102,7 +112,7 @@ export async function getRange(
   end: number
 ): Promise<string> {
   await ensureConnection()
-  const result = await redis.getRange(key, start, end)
+  const result = await redis.getRange(withNamespace(key), start, end)
   return result || ""
 }
 
@@ -119,7 +129,7 @@ export async function setRange(
   value: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.setRange(key, offset, value)
+  return await redis.setRange(withNamespace(key), offset, value)
 }
 
 // ==================== 数値操作 ====================
@@ -131,7 +141,7 @@ export async function setRange(
  */
 export async function incr(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.incr(key)
+  return await redis.incr(withNamespace(key))
 }
 
 /**
@@ -141,7 +151,7 @@ export async function incr(key: string): Promise<number> {
  */
 export async function incrBy(key: string, increment: number): Promise<number> {
   await ensureConnection()
-  return await redis.incrBy(key, increment)
+  return await redis.incrBy(withNamespace(key), increment)
 }
 
 /**
@@ -154,7 +164,7 @@ export async function incrByFloat(
   increment: number
 ): Promise<string> {
   await ensureConnection()
-  return await redis.incrByFloat(key, increment)
+  return await redis.incrByFloat(withNamespace(key), increment)
 }
 
 /**
@@ -164,7 +174,7 @@ export async function incrByFloat(
  */
 export async function decr(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.decr(key)
+  return await redis.decr(withNamespace(key))
 }
 
 /**
@@ -174,7 +184,7 @@ export async function decr(key: string): Promise<number> {
  */
 export async function decrBy(key: string, decrement: number): Promise<number> {
   await ensureConnection()
-  return await redis.decrBy(key, decrement)
+  return await redis.decrBy(withNamespace(key), decrement)
 }
 
 // ==================== JSON操作（シリアライズ） ====================
@@ -192,9 +202,9 @@ export async function setJSON<T>(
   await ensureConnection()
   const serialized = JSON.stringify(value)
   if (ttl) {
-    return await redis.setEx(key, ttl, serialized)
+    return await redis.setEx(withNamespace(key), ttl, serialized)
   }
-  return await redis.set(key, serialized)
+  return await redis.set(withNamespace(key), serialized)
 }
 
 /**
@@ -204,7 +214,7 @@ export async function setJSON<T>(
  */
 export async function getJSON<T>(key: string): Promise<T | null> {
   await ensureConnection()
-  const result = await redis.get(key)
+  const result = await redis.get(withNamespace(key))
   return result ? JSON.parse(result) : null
 }
 
@@ -218,7 +228,7 @@ export async function getJSON<T>(key: string): Promise<T | null> {
  */
 export async function getTTL(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.ttl(key)
+  return await redis.ttl(withNamespace(key))
 }
 
 /**
@@ -228,7 +238,7 @@ export async function getTTL(key: string): Promise<number> {
  */
 export async function expire(key: string, seconds: number): Promise<boolean> {
   await ensureConnection()
-  return (await redis.expire(key, seconds)) === 1
+  return (await redis.expire(withNamespace(key), seconds)) === 1
 }
 
 /**
@@ -241,7 +251,7 @@ export async function pExpire(
   milliseconds: number
 ): Promise<boolean> {
   await ensureConnection()
-  return (await redis.pExpire(key, milliseconds)) === 1
+  return (await redis.pExpire(withNamespace(key), milliseconds)) === 1
 }
 
 /**
@@ -251,7 +261,7 @@ export async function pExpire(
  */
 export async function persist(key: string): Promise<boolean> {
   await ensureConnection()
-  return (await redis.persist(key)) === 1
+  return (await redis.persist(withNamespace(key))) === 1
 }
 
 // ==================== キー管理 ====================
@@ -263,7 +273,7 @@ export async function persist(key: string): Promise<boolean> {
  */
 export async function exists(key: string): Promise<boolean> {
   await ensureConnection()
-  return (await redis.exists(key)) === 1
+  return (await redis.exists(withNamespace(key))) === 1
 }
 
 /**
@@ -274,7 +284,7 @@ export async function exists(key: string): Promise<boolean> {
  */
 export async function del(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.del(key)
+  return await redis.del(withNamespace(key))
 }
 
 /**
@@ -285,7 +295,7 @@ export async function del(key: string): Promise<number> {
  */
 export async function delMany(keys: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.del(keys)
+  return await redis.del(keys.map(withNamespace))
 }
 
 /**
@@ -295,18 +305,20 @@ export async function delMany(keys: string[]): Promise<number> {
  */
 export async function rename(oldKey: string, newKey: string): Promise<string> {
   await ensureConnection()
-  return await redis.rename(oldKey, newKey)
+  return await redis.rename(withNamespace(oldKey), withNamespace(newKey))
 }
 
 /**
  * パターンに一致するキーを検索（本番環境では使用注意）
+ * 検索・結果ともに自身の名前空間内に限定される
  * @warning 大規模データでは遅くなるためSCANの使用を推奨
  * @example
- * const keys = await keys("user:*"); // user:で始まる全キー
+ * const keys = await keys("user:*"); // user:で始まる全キー（自プロジェクト分のみ）
  */
 export async function keys(pattern: string): Promise<string[]> {
   await ensureConnection()
-  return await redis.keys(pattern)
+  const result = await redis.keys(withNamespace(pattern))
+  return result.map(stripNamespace)
 }
 
 // ==================== ビット操作 ====================
@@ -322,7 +334,7 @@ export async function setBit(
   value: 0 | 1
 ): Promise<number> {
   await ensureConnection()
-  return await redis.setBit(key, offset, value)
+  return await redis.setBit(withNamespace(key), offset, value)
 }
 
 /**
@@ -332,7 +344,7 @@ export async function setBit(
  */
 export async function getBit(key: string, offset: number): Promise<number> {
   await ensureConnection()
-  return await redis.getBit(key, offset)
+  return await redis.getBit(withNamespace(key), offset)
 }
 
 /**
@@ -342,5 +354,5 @@ export async function getBit(key: string, offset: number): Promise<number> {
  */
 export async function bitCount(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.bitCount(key)
+  return await redis.bitCount(withNamespace(key))
 }

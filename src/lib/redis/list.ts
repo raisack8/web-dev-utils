@@ -1,8 +1,14 @@
-import { ensureConnection, redis } from "./client"
+import {
+  ensureConnection,
+  redis,
+  stripNamespace,
+  withNamespace,
+} from "./client"
 
 /**
  * Redis List型操作のヘルパー関数群
  * Listは順序付きの文字列リストで、キューやスタックとして使用可能
+ * キーは共有Redis上で衝突しないよう内部で自動的に名前空間化されます
  */
 
 // ==================== 基本操作 ====================
@@ -16,7 +22,7 @@ import { ensureConnection, redis } from "./client"
  */
 export async function lPush(key: string, ...values: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.lPush(key, values)
+  return await redis.lPush(withNamespace(key), values)
 }
 
 /**
@@ -28,7 +34,7 @@ export async function lPush(key: string, ...values: string[]): Promise<number> {
  */
 export async function rPush(key: string, ...values: string[]): Promise<number> {
   await ensureConnection()
-  return await redis.rPush(key, values)
+  return await redis.rPush(withNamespace(key), values)
 }
 
 /**
@@ -40,7 +46,7 @@ export async function rPush(key: string, ...values: string[]): Promise<number> {
  */
 export async function lPop(key: string): Promise<string | null> {
   await ensureConnection()
-  return await redis.lPop(key)
+  return await redis.lPop(withNamespace(key))
 }
 
 /**
@@ -52,7 +58,7 @@ export async function lPop(key: string): Promise<string | null> {
  */
 export async function rPop(key: string): Promise<string | null> {
   await ensureConnection()
-  return await redis.rPop(key)
+  return await redis.rPop(withNamespace(key))
 }
 
 /**
@@ -63,7 +69,7 @@ export async function rPop(key: string): Promise<string | null> {
  */
 export async function lLen(key: string): Promise<number> {
   await ensureConnection()
-  return await redis.lLen(key)
+  return await redis.lLen(withNamespace(key))
 }
 
 /**
@@ -81,7 +87,7 @@ export async function lRange(
   stop: number
 ): Promise<string[]> {
   await ensureConnection()
-  return await redis.lRange(key, start, stop)
+  return await redis.lRange(withNamespace(key), start, stop)
 }
 
 /**
@@ -91,7 +97,7 @@ export async function lRange(
  */
 export async function lGetAll(key: string): Promise<string[]> {
   await ensureConnection()
-  return await redis.lRange(key, 0, -1)
+  return await redis.lRange(withNamespace(key), 0, -1)
 }
 
 /**
@@ -105,7 +111,7 @@ export async function lIndex(
   index: number
 ): Promise<string | null> {
   await ensureConnection()
-  return await redis.lIndex(key, index)
+  return await redis.lIndex(withNamespace(key), index)
 }
 
 /**
@@ -120,7 +126,7 @@ export async function lSet(
   value: string
 ): Promise<string> {
   await ensureConnection()
-  return await redis.lSet(key, index, value)
+  return await redis.lSet(withNamespace(key), index, value)
 }
 
 // ==================== 高度な操作 ====================
@@ -140,7 +146,7 @@ export async function lRem(
   value: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.lRem(key, count, value)
+  return await redis.lRem(withNamespace(key), count, value)
 }
 
 /**
@@ -157,7 +163,7 @@ export async function lTrim(
   stop: number
 ): Promise<string> {
   await ensureConnection()
-  return await redis.lTrim(key, start, stop)
+  return await redis.lTrim(withNamespace(key), start, stop)
 }
 
 /**
@@ -174,7 +180,7 @@ export async function lInsert(
   value: string
 ): Promise<number> {
   await ensureConnection()
-  return await redis.lInsert(key, position, pivot, value)
+  return await redis.lInsert(withNamespace(key), position, pivot, value)
 }
 
 /**
@@ -190,7 +196,7 @@ export async function lPushX(
   ...values: string[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.lPushX(key, values)
+  return await redis.lPushX(withNamespace(key), values)
 }
 
 /**
@@ -202,7 +208,7 @@ export async function rPushX(
   ...values: string[]
 ): Promise<number> {
   await ensureConnection()
-  return await redis.rPushX(key, values)
+  return await redis.rPushX(withNamespace(key), values)
 }
 
 // ==================== ブロッキング操作 ====================
@@ -220,7 +226,8 @@ export async function blPop(
   timeout: number
 ): Promise<{ key: string; element: string } | null> {
   await ensureConnection()
-  return await redis.blPop(key, timeout)
+  const result = await redis.blPop(withNamespace(key), timeout)
+  return result ? { ...result, key: stripNamespace(result.key) } : null
 }
 
 /**
@@ -232,7 +239,8 @@ export async function brPop(
   timeout: number
 ): Promise<{ key: string; element: string } | null> {
   await ensureConnection()
-  return await redis.brPop(key, timeout)
+  const result = await redis.brPop(withNamespace(key), timeout)
+  return result ? { ...result, key: stripNamespace(result.key) } : null
 }
 
 /**
@@ -246,7 +254,10 @@ export async function rPopLPush(
   destination: string
 ): Promise<string | null> {
   await ensureConnection()
-  return await redis.rPopLPush(source, destination)
+  return await redis.rPopLPush(
+    withNamespace(source),
+    withNamespace(destination)
+  )
 }
 
 /**
@@ -262,7 +273,11 @@ export async function brPopLPush(
   timeout: number
 ): Promise<string | null> {
   await ensureConnection()
-  return await redis.brPopLPush(source, destination, timeout)
+  return await redis.brPopLPush(
+    withNamespace(source),
+    withNamespace(destination),
+    timeout
+  )
 }
 
 // ==================== JSON操作（シリアライズ） ====================
@@ -278,7 +293,7 @@ export async function rPushJSON<T>(
 ): Promise<number> {
   await ensureConnection()
   const serialized = values.map((v) => JSON.stringify(v))
-  return await redis.rPush(key, serialized)
+  return await redis.rPush(withNamespace(key), serialized)
 }
 
 /**
@@ -292,7 +307,7 @@ export async function lPushJSON<T>(
 ): Promise<number> {
   await ensureConnection()
   const serialized = values.map((v) => JSON.stringify(v))
-  return await redis.lPush(key, serialized)
+  return await redis.lPush(withNamespace(key), serialized)
 }
 
 /**
@@ -302,7 +317,7 @@ export async function lPushJSON<T>(
  */
 export async function lPopJSON<T>(key: string): Promise<T | null> {
   await ensureConnection()
-  const result = await redis.lPop(key)
+  const result = await redis.lPop(withNamespace(key))
   return result ? JSON.parse(result) : null
 }
 
@@ -311,7 +326,7 @@ export async function lPopJSON<T>(key: string): Promise<T | null> {
  */
 export async function rPopJSON<T>(key: string): Promise<T | null> {
   await ensureConnection()
-  const result = await redis.rPop(key)
+  const result = await redis.rPop(withNamespace(key))
   return result ? JSON.parse(result) : null
 }
 
@@ -326,7 +341,7 @@ export async function lRangeJSON<T>(
   stop: number
 ): Promise<T[]> {
   await ensureConnection()
-  const results = await redis.lRange(key, start, stop)
+  const results = await redis.lRange(withNamespace(key), start, stop)
   return results.map((r) => JSON.parse(r))
 }
 
@@ -335,6 +350,6 @@ export async function lRangeJSON<T>(
  */
 export async function lGetAllJSON<T>(key: string): Promise<T[]> {
   await ensureConnection()
-  const results = await redis.lRange(key, 0, -1)
+  const results = await redis.lRange(withNamespace(key), 0, -1)
   return results.map((r) => JSON.parse(r))
 }
