@@ -1,12 +1,14 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { upload } from "@vercel/blob/client"
 import { Download, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { deleteFile, uploadFile, type BlobFile } from "@/lib/action/blob"
+import { deleteFile, type BlobFile } from "@/lib/action/blob"
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -20,20 +22,31 @@ function formatDate(dateString: string): string {
 
 export default function BlobArea({ files = [] }: { files?: BlobFile[] }) {
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
+  const [isUploading, startUpload] = useTransition()
 
-  const handleUpload = async (formData: FormData) => {
+  // Server Actionはボディ上限(Vercelで4.5MB)があるため、ブラウザから直接アップロードする
+  const handleUpload = (formData: FormData) => {
     const file = formData.get("file")
     if (!(file instanceof File) || file.size === 0) {
       toast.error("ファイルを選択してください")
       return
     }
-    const result = await uploadFile(formData)
-    if (result.success) {
-      toast.success(result.message)
-      formRef.current?.reset()
-    } else {
-      toast.error(result.message)
-    }
+    startUpload(async () => {
+      try {
+        await upload(file.name, file, {
+          access: "private",
+          handleUploadUrl: "/api/blob/upload",
+          multipart: true,
+        })
+        toast.success("アップロードしました")
+        formRef.current?.reset()
+        router.refresh()
+      } catch (error) {
+        console.error("Blob upload error:", error)
+        toast.error("アップロードに失敗しました")
+      }
+    })
   }
 
   const handleDelete = async (pathname: string) => {
@@ -58,7 +71,9 @@ export default function BlobArea({ files = [] }: { files?: BlobFile[] }) {
         >
           <h2 className="text-lg font-medium sm:mr-2">ファイル保存</h2>
           <Input type="file" name="file" required className="flex-1" />
-          <Button type="submit">アップロード</Button>
+          <Button type="submit" disabled={isUploading}>
+            {isUploading ? "アップロード中..." : "アップロード"}
+          </Button>
         </form>
       </Card>
       <div className="w-full ml-1 grid md:grid-cols-2 gap-2">
