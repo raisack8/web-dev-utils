@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Target } from "lucide-react"
+import SidebarSlide from "@/components/SidebarSlide"
 import {
   SidebarContent,
   SidebarHeader,
@@ -12,8 +12,7 @@ import { navigationItems } from "@/data/navigation"
 
 export default function Sidebar() {
   return (
-    // 普段は左端の細い帯だけを見せ、ホバーまたはフォーカスでスライドして表示する
-    <div className="peer/sidebar hidden md:block fixed inset-y-0 left-0 z-40 w-[14rem] -translate-x-[calc(100%_-_8px)] transition-transform duration-200 hover:translate-x-0 has-[:focus-visible]:translate-x-0 after:absolute after:inset-y-0 after:right-0 after:w-1 after:bg-primary">
+    <SidebarSlide>
       <SidebarPrimitive collapsible="none" className="w-full h-full ps-4">
         <SidebarHeader>
           <h2 className="text-lg font-semibold px-4 py-2">
@@ -34,6 +33,6 @@ export default function Sidebar() {
           </SidebarMenu>
         </SidebarContent>
       </SidebarPrimitive>
-    </div>
+    </SidebarSlide>
   )
 }
