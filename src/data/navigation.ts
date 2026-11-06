@@ -21,18 +21,8 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
-    label: "認証",
-    path: "/auth",
-    target: undefined,
-  },
-  {
     label: "パフォーマンス",
     path: "/performance",
-    target: undefined,
-  },
-  {
-    label: "Redis",
-    path: "/redis",
     target: undefined,
   },
   {
