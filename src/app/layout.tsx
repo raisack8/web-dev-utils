@@ -1,12 +1,14 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { DotGothic16, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import AppShell from "@/components/AppShell"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// 日本語グリフはunicode-range分割で配信されるため、preloadはlatinのみ指定
+const dotGothic = DotGothic16({
+  variable: "--font-dotgothic",
+  weight: "400",
   subsets: ["latin"],
 })
 
@@ -28,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dotGothic.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
