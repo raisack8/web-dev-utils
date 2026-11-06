@@ -80,6 +80,36 @@
   --sidebar-ring: oklch(0.88 0.26 130);
 }
 
+/* 白黒配色: ライムを白に置き換える(フォントはそのまま) */
+html[data-palette="mono"] {
+  --primary: oklch(1 0 0);
+  --accent: oklch(1 0 0);
+  --destructive: oklch(0.75 0 0);
+  --border: oklch(1 0 0 / 25%);
+  --input: oklch(1 0 0 / 25%);
+  --ring: oklch(1 0 0);
+  --chart-1: oklch(1 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-accent: oklch(1 0 0);
+  --sidebar-border: oklch(1 0 0 / 25%);
+  --sidebar-ring: oklch(1 0 0);
+}
+
+html[data-palette="mono"] ::selection {
+  background: oklch(1 0 0);
+  color: oklch(0 0 0);
+}
+
+html[data-palette="mono"] .excalidraw.theme--dark {
+  --color-primary: #ffffff;
+  --color-primary-darker: #d4d4d4;
+  --color-primary-darkest: #a3a3a3;
+  --color-primary-light: #3a3a3a;
+  --color-surface-primary-container: #3a3a3a;
+  --color-brand-hover: #d4d4d4;
+  --color-brand-active: #a3a3a3;
+}
+
 ::selection {
   background: oklch(0.88 0.26 130);
   color: oklch(0 0 0);

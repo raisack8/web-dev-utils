@@ -29,6 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" suppressHydrationWarning>
+      <head>
+        {/* 保存済みの配色を描画前に反映する(ちらつき防止) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("palette")==="mono")document.documentElement.dataset.palette="mono"}catch(e){}`,
+          }}
+        />
+      </head>
       <body
         className={`${dotGothic.variable} ${geistMono.variable} antialiased`}
       >

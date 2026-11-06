@@ -1,7 +1,9 @@
 import Link from "next/link"
+import PaletteToggle from "@/components/PaletteToggle"
 import SidebarSlide from "@/components/SidebarSlide"
 import {
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -32,6 +34,9 @@ export default function Sidebar() {
             ))}
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+          <PaletteToggle />
+        </SidebarFooter>
       </SidebarPrimitive>
     </SidebarSlide>
   )
