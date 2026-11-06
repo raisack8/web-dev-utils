@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import {
+  ChevronLeft,
   ChevronRight,
   FilePlus,
   FileText,
@@ -26,6 +27,11 @@ import {
 const NoteEditor = dynamic(() => import("./NoteEditor"), { ssr: false })
 const CanvasEditor = dynamic(() => import("./CanvasEditor"), { ssr: false })
 
+const WIDTH_KEY = "notes:explorerWidth"
+const MIN_WIDTH = 160
+const MAX_WIDTH = 600
+const DEFAULT_WIDTH = 288
+
 type OpenNote = { id: string; content: string }
 type Creating = { type: NoteNode["type"]; format?: NoteNode["format"] }
 
@@ -36,6 +42,33 @@ export default function NotesExplorer() {
   const [open, setOpen] = useState<OpenNote | null>(null)
   const [creating, setCreating] = useState<Creating | null>(null)
   const [name, setName] = useState("")
+  // 左右の枠の境界をドラッグで動かす。幅は端末ごとに記憶する
+  const [width, setWidth] = useState(DEFAULT_WIDTH)
+  const [collapsed, setCollapsed] = useState(false)
+  const explorerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    try {
+      const saved = Number(localStorage.getItem(WIDTH_KEY))
+      if (saved >= MIN_WIDTH && saved <= MAX_WIDTH) setWidth(saved)
+    } catch {
+      // localStorageが使えない環境では既定幅のまま
+    }
+  }, [])
+
+  const saveWidth = (w: number) => {
+    try {
+      localStorage.setItem(WIDTH_KEY, String(w))
+    } catch {
+      // 保存できなくても動作に影響しない
+    }
+  }
+
+  const handleResize = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+    const left = explorerRef.current?.getBoundingClientRect().left ?? 0
+    setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, e.clientX - left)))
+  }
 
   useEffect(() => {
     getNoteNodes()
@@ -111,9 +144,15 @@ export default function NotesExplorer() {
   const Editor = openNode?.format === "canvas" ? CanvasEditor : NoteEditor
 
   return (
-    <div className="grid md:grid-cols-[18rem_1fr] gap-4 md:h-[calc(100vh-4rem)]">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-0 md:h-[calc(100vh-4rem)]">
       {/* エクスプローラー */}
-      <div className="border p-3 space-y-3 overflow-auto">
+      <div
+        ref={explorerRef}
+        style={{ "--explorer-width": `${width}px` } as React.CSSProperties}
+        className={`border p-3 space-y-3 overflow-auto md:shrink-0 md:w-[var(--explorer-width)] ${
+          collapsed ? "md:hidden" : ""
+        }`}
+      >
         <div className="flex flex-wrap items-center gap-1 text-sm">
           <button
             type="button"
@@ -222,8 +261,30 @@ export default function NotesExplorer() {
         </ul>
       </div>
 
+      {/* 境界(ドラッグで幅を変更、ボタンで開閉) */}
+      <div className="hidden md:flex w-3 shrink-0 flex-col items-center group/handle">
+        <button
+          type="button"
+          aria-label={collapsed ? "一覧を開く" : "一覧を閉じる"}
+          className="mt-1 text-muted-foreground hover:text-primary"
+          onClick={() => setCollapsed((v) => !v)}
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
+        {!collapsed && (
+          <div
+            className="flex-1 w-1.5 cursor-col-resize touch-none hover:bg-primary/50"
+            onPointerDown={(e) =>
+              e.currentTarget.setPointerCapture(e.pointerId)
+            }
+            onPointerMove={handleResize}
+            onPointerUp={() => saveWidth(width)}
+          />
+        )}
+      </div>
+
       {/* エディタ */}
-      <div className="border p-4 min-h-[60vh] md:min-h-0 overflow-hidden">
+      <div className="flex-1 min-w-0 border p-4 min-h-[60vh] md:min-h-0 overflow-hidden">
         {open ? (
           <div className="flex flex-col h-full">
             <h2 className="text-lg font-medium mb-2 truncate">

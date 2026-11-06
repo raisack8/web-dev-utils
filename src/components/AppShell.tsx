@@ -14,7 +14,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar />
       <MobileMenuBar />
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 min-w-0 p-8 md:pl-10">{children}</main>
     </SidebarProvider>
   )
 }
