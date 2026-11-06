@@ -8,6 +8,7 @@ import {
   FileText,
   Folder,
   FolderPlus,
+  Shapes,
   Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -21,17 +22,19 @@ import {
   type NoteNode,
 } from "@/lib/action/notes"
 
-// エディタ(TipTap)はノートを開いたときだけ読み込む
+// エディタ(TipTap / Excalidraw)はノートを開いたときだけ読み込む
 const NoteEditor = dynamic(() => import("./NoteEditor"), { ssr: false })
+const CanvasEditor = dynamic(() => import("./CanvasEditor"), { ssr: false })
 
 type OpenNote = { id: string; content: string }
+type Creating = { type: NoteNode["type"]; format?: NoteNode["format"] }
 
 export default function NotesExplorer() {
   const [nodes, setNodes] = useState<NoteNode[]>([])
   const [loaded, setLoaded] = useState(false)
   const [folderId, setFolderId] = useState<string | null>(null)
   const [open, setOpen] = useState<OpenNote | null>(null)
-  const [creating, setCreating] = useState<NoteNode["type"] | null>(null)
+  const [creating, setCreating] = useState<Creating | null>(null)
   const [name, setName] = useState("")
 
   useEffect(() => {
@@ -77,7 +80,12 @@ export default function NotesExplorer() {
   const handleCreate = async () => {
     if (!creating) return
     try {
-      const node = await createNoteNode(folderId, creating, name)
+      const node = await createNoteNode(
+        folderId,
+        creating.type,
+        name,
+        creating.format
+      )
       setNodes((prev) => [...prev, node])
       setCreating(null)
       setName("")
@@ -99,7 +107,8 @@ export default function NotesExplorer() {
     }
   }
 
-  const openName = open ? byId.get(open.id)?.name : undefined
+  const openNode = open ? byId.get(open.id) : undefined
+  const Editor = openNode?.format === "canvas" ? CanvasEditor : NoteEditor
 
   return (
     <div className="grid md:grid-cols-[18rem_1fr] gap-4 md:h-[calc(100vh-4rem)]">
@@ -127,20 +136,30 @@ export default function NotesExplorer() {
           ))}
         </div>
 
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCreating("folder")}
+            title="フォルダ"
+            onClick={() => setCreating({ type: "folder" })}
           >
             <FolderPlus size={14} /> フォルダ
           </Button>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCreating("note")}
+            title="マークダウンのノート"
+            onClick={() => setCreating({ type: "note", format: "md" })}
           >
-            <FilePlus size={14} /> ノート
+            <FilePlus size={14} /> MD
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            title="ホワイトボード(キャンバス)"
+            onClick={() => setCreating({ type: "note", format: "canvas" })}
+          >
+            <Shapes size={14} /> キャンバス
           </Button>
         </div>
 
@@ -149,7 +168,9 @@ export default function NotesExplorer() {
             <Input
               autoFocus
               value={name}
-              placeholder={creating === "folder" ? "フォルダ名" : "ノート名"}
+              placeholder={
+                creating.type === "folder" ? "フォルダ名" : "ノート名"
+              }
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setCreating(null)}
             />
@@ -181,6 +202,8 @@ export default function NotesExplorer() {
               >
                 {node.type === "folder" ? (
                   <Folder size={14} className="shrink-0 text-primary" />
+                ) : node.format === "canvas" ? (
+                  <Shapes size={14} className="shrink-0" />
                 ) : (
                   <FileText size={14} className="shrink-0" />
                 )}
@@ -203,9 +226,15 @@ export default function NotesExplorer() {
       <div className="border p-4 min-h-[60vh] md:min-h-0 overflow-hidden">
         {open ? (
           <div className="flex flex-col h-full">
-            <h2 className="text-lg font-medium mb-2 truncate">{openName}</h2>
-            <div className="flex-1 min-h-0">
-              <NoteEditor
+            <h2 className="text-lg font-medium mb-2 truncate">
+              {openNode?.name}
+            </h2>
+            <div
+              className={`flex-1 min-h-0 ${
+                openNode?.format === "canvas" ? "h-[70vh] md:h-auto" : ""
+              }`}
+            >
+              <Editor
                 key={open.id}
                 noteId={open.id}
                 initialContent={open.content}

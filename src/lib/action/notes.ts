@@ -6,6 +6,8 @@ export interface NoteNode {
   id: string
   parentId: string | null // null はルート
   type: "folder" | "note"
+  // ノートの種類。未設定(既存データ)は md として扱う
+  format?: "md" | "canvas"
   name: string
   updatedAt: string
 }
@@ -27,7 +29,8 @@ export async function getNoteNodes() {
 export async function createNoteNode(
   parentId: string | null,
   type: NoteNode["type"],
-  name: string
+  name: string,
+  format: NonNullable<NoteNode["format"]> = "md"
 ) {
   const trimmed = name.trim()
   if (!trimmed) throw new Error("名前を入力してください")
@@ -44,6 +47,7 @@ export async function createNoteNode(
     id: crypto.randomUUID(),
     parentId,
     type,
+    ...(type === "note" ? { format } : {}),
     name: trimmed,
     updatedAt: new Date().toISOString(),
   }
