@@ -30,7 +30,7 @@ export default function Home() {
             </Label>
             <Label>処理の流れ: 🛌未実行 → 🏃‍♂️‍➡️データ取得中 → 🙆‍♂️取得完了</Label>
           </div>
-          <Button className="rounded-full" variant="outline">
+          <Button variant="outline">
             <Link href="/performance/lazy/overview">Over View</Link>
           </Button>
         </CardContent>

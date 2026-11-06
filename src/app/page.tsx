@@ -46,12 +46,12 @@ export default function Page() {
     },
   ]
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-16 space-y-4">
-            <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-7xl font-bold text-primary">
               Web Dev Utils
             </h1>
             <p className="text-xl text-muted-foreground">Web開発ツールキット</p>

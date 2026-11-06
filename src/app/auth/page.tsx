@@ -75,7 +75,7 @@ export default function AuthPage() {
       <Button
         variant="ghost"
         size="icon"
-        className="size-14 rounded-full"
+        className="size-14"
         onClick={() => handleLogin()}
         disabled={isLoading}
         aria-label="パスキー"

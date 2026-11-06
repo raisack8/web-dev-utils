@@ -190,8 +190,7 @@ useEffect(() => {
                 shouldLoad、isLoading、resultの3つの状態で制御
               </li>
               <li>
-                <strong>重複防止:</strong>{" "}
-                条件分岐でデータの重複取得を防ぐ
+                <strong>重複防止:</strong> 条件分岐でデータの重複取得を防ぐ
               </li>
             </ul>
           </div>
@@ -204,7 +203,7 @@ useEffect(() => {
           </div>
 
           <div className="pt-4">
-            <Button className="rounded-full" variant="default" asChild>
+            <Button variant="default" asChild>
               <Link href="/performance/lazy">デモを見る</Link>
             </Button>
           </div>
@@ -291,9 +290,7 @@ export default function DynamicLazyCard({ index }: { index: number }) {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-2 text-sm">
-                使用例（page.tsx）
-              </h4>
+              <h4 className="font-semibold mb-2 text-sm">使用例（page.tsx）</h4>
               <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs">
                 <code>{`export default function Home() {
   return (

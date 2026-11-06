@@ -9,7 +9,7 @@ export default function Home() {
         <Label className="text-lg border-b border-gray-300 mb-2 px-10">
           Performance.
         </Label>
-        <Button className="rounded-full">
+        <Button>
           <Link href="/performance/lazy">Lazy load</Link>
         </Button>
       </main>

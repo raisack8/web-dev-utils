@@ -34,8 +34,8 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          forcedTheme="dark"
+          defaultTheme="dark"
           disableTransitionOnChange
         >
           <AppShell>{children}</AppShell>
