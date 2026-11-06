@@ -93,3 +93,63 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+/* ノートエディタ(TipTap)の本文スタイル */
+.note-editor {
+  outline: none;
+  min-height: 40vh;
+  line-height: 1.8;
+}
+.note-editor > * + * {
+  margin-top: 0.75rem;
+}
+.note-editor h1 {
+  font-size: 1.75rem;
+  color: var(--primary);
+}
+.note-editor h2 {
+  font-size: 1.4rem;
+  color: var(--primary);
+}
+.note-editor h3 {
+  font-size: 1.15rem;
+}
+.note-editor ul {
+  list-style: square;
+  padding-left: 1.5rem;
+}
+.note-editor ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.note-editor blockquote {
+  border-left: 2px solid var(--primary);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+}
+.note-editor code {
+  background: var(--secondary);
+  padding: 0.1rem 0.3rem;
+}
+.note-editor pre {
+  background: var(--secondary);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+.note-editor pre code {
+  padding: 0;
+}
+.note-editor hr {
+  border-color: var(--border);
+}
+.note-editor a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.note-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

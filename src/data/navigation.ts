@@ -16,6 +16,11 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
+    label: "ノート",
+    path: "/notes",
+    target: undefined,
+  },
+  {
     label: "サンプル画像",
     path: "/sample-image",
     target: undefined,
