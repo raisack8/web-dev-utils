@@ -40,9 +40,10 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
     return new Date(dateString).toLocaleString("ja-JP")
   }
 
-  const formatExpiryDate = (createdAt: string, ttl: number) => {
-    const createdDate = new Date(createdAt)
-    const expiryDate = new Date(createdDate.getTime() + ttl * 1000)
+  // ttl は Redis の残り秒数。-1 は期限なし(TTL 0 で保存したメモ)
+  const formatExpiryDate = (ttl: number) => {
+    if (ttl < 0) return "なし"
+    const expiryDate = new Date(Date.now() + ttl * 1000)
     return expiryDate
       .toLocaleString("ja-JP", {
         year: "numeric",
@@ -152,7 +153,7 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
                 {memo.content}
               </p>
               <div className="text-xs text-muted-foreground">
-                期限: {formatExpiryDate(memo.createdAt, memo.ttl)}
+                期限: {formatExpiryDate(memo.ttl)}
               </div>
             </div>
           </Card>
