@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Label } from "@radix-ui/react-label"
-import { RefreshCw, Trash2 } from "lucide-react"
+import { Infinity as InfinityIcon, RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   deleteMemo,
+  removeMemoTtl,
   saveMemo,
   updateMemoTtl,
   type Memo,
@@ -68,21 +69,21 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
 
   const handleUpdateTtl = async (key: string) => {
     try {
-      const memo = memos.find((m) => m.id === key)
-      if (!memo) {
-        toast.error("メモが見つかりません")
-        return
-      }
-      const memoData = {
-        randomId: memo.randomId,
-        content: memo.content,
-        createdAt: memo.createdAt,
-      }
-      await updateMemoTtl(key, JSON.stringify(memoData))
-      toast.success(`TTLを残り1週間に更新しました`)
+      await updateMemoTtl(key)
+      toast.success(`TTLを更新しました`)
     } catch (error) {
       console.warn("Update TTL error:", error)
       toast.error("メモの更新に失敗しました")
+    }
+  }
+
+  const handleRemoveTtl = async (key: string) => {
+    try {
+      await removeMemoTtl(key)
+      toast.success("期限を消しました")
+    } catch (error) {
+      console.warn("Remove TTL error:", error)
+      toast.error("期限を消せませんでした")
     }
   }
 
@@ -126,17 +127,32 @@ export default function MemoArea({ memos = [] }: { memos?: Memo[] }) {
                   <span className="text-xs text-muted-foreground">
                     {formatDate(memo.createdAt)}
                   </span>
-                  <form action={() => handleUpdateTtl(memo.id)}>
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                      title="TTLを25200秒に更新"
-                    >
-                      <RefreshCw size={14} />
-                    </Button>
-                  </form>
+                  {memo.ttl >= 0 && (
+                    <>
+                      <form action={() => handleUpdateTtl(memo.id)}>
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                          title="TTLを25200秒に更新"
+                        >
+                          <RefreshCw size={14} />
+                        </Button>
+                      </form>
+                      <form action={() => handleRemoveTtl(memo.id)}>
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                          title="期限を消す"
+                        >
+                          <InfinityIcon size={14} />
+                        </Button>
+                      </form>
+                    </>
+                  )}
                   <form action={() => handleDelete(memo.id)}>
                     <Button
                       type="button"

@@ -1,7 +1,15 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { del, get, getTTL, keys, setJSON } from "@/lib/redis/string"
+import {
+  del,
+  expire,
+  get,
+  getTTL,
+  keys,
+  persist,
+  setJSON,
+} from "@/lib/redis/string"
 
 export interface Memo {
   id: string
@@ -76,11 +84,21 @@ export async function deleteMemo(key: string) {
   return { success: true }
 }
 
-export async function updateMemoTtl(key: string, value: string) {
-  const result = await setJSON(key, JSON.parse(value), 25500)
-  if (!result) {
+export async function updateMemoTtl(key: string) {
+  // 期限なし(-1)のメモに期限を付けてしまわないようにする
+  if ((await getTTL(key)) < 0) {
+    throw new Error("期限なしのメモは更新できません")
+  }
+  if (!(await expire(key, 25500))) {
     console.error(`Memo not found for id: ${key}`)
     throw new Error("メモが見つかりません")
+  }
+  revalidatePath("/memo")
+}
+
+export async function removeMemoTtl(key: string) {
+  if (!(await persist(key))) {
+    throw new Error("期限を消せませんでした")
   }
   revalidatePath("/memo")
 }
