@@ -11,10 +11,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/auth") return <main>{children}</main>
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="overflow-x-clip">
       <Sidebar />
       <MobileMenuBar />
-      <main className="flex-1 min-w-0 p-8 md:pl-10">{children}</main>
+      {/* サイドバーが出ている間は、画面全体を見た目だけ右にずらす(はみ出した分はスクロールしない) */}
+      <main className="flex-1 min-w-0 p-8 md:pl-10 transition-transform duration-200 md:peer-hover/sidebar:translate-x-[calc(14rem_-_8px)] md:peer-has-[:focus-visible]/sidebar:translate-x-[calc(14rem_-_8px)]">
+        {children}
+      </main>
     </SidebarProvider>
   )
 }
