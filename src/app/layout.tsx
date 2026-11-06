@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
-import MobileMenuBar from "@/components/MobileMenuBar"
-import Sidebar from "@/components/Sidebar"
+import AppShell from "@/components/AppShell"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
@@ -38,12 +36,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <Sidebar />
-            <MobileMenuBar />
-            <main className="flex-1 p-8">{children}</main>
-            <Toaster position="top-center" richColors />
-          </SidebarProvider>
+          <AppShell>{children}</AppShell>
+          <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>
     </html>
