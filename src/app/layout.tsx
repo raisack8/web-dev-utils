@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { SessionProvider } from "next-auth/react"
 import "./globals.css"
 import MobileMenuBar from "@/components/MobileMenuBar"
 import Sidebar from "@/components/Sidebar"
@@ -33,21 +32,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SidebarProvider>
-              <Sidebar />
-              <MobileMenuBar />
-              <main className="flex-1 p-8">{children}</main>
-              <Toaster position="top-center" richColors />
-            </SidebarProvider>
-          </ThemeProvider>
-        </SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <Sidebar />
+            <MobileMenuBar />
+            <main className="flex-1 p-8">{children}</main>
+            <Toaster position="top-center" richColors />
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
