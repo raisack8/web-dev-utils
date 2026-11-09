@@ -157,9 +157,12 @@ html[data-palette="mono"] .excalidraw.theme--dark {
   padding-left: 1rem;
   color: var(--muted-foreground);
 }
+/* `インラインコード` はハイライトとして目立たせる */
 .note-editor code {
-  background: var(--secondary);
-  padding: 0.1rem 0.3rem;
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent);
+  padding: 0.05rem 0.3rem;
 }
 .note-editor pre {
   background: var(--secondary);
@@ -167,7 +170,37 @@ html[data-palette="mono"] .excalidraw.theme--dark {
   overflow-x: auto;
 }
 .note-editor pre code {
+  color: inherit;
+  background: none;
+  border: 0;
   padding: 0;
+}
+.note-editor .tableWrapper {
+  overflow-x: auto;
+}
+.note-editor table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.note-editor th,
+.note-editor td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  min-width: 4rem;
+  vertical-align: top;
+  position: relative;
+}
+.note-editor th {
+  background: var(--secondary);
+  color: var(--primary);
+  text-align: left;
+}
+.note-editor .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--primary) 20%, transparent);
+  pointer-events: none;
 }
 .note-editor hr {
   border-color: var(--border);
