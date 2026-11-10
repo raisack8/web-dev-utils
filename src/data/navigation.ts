@@ -11,6 +11,11 @@ export const navigationItems: NavigationItem[] = [
     target: undefined,
   },
   {
+    label: "タイムスタンプ",
+    path: "/timestamp",
+    target: undefined,
+  },
+  {
     label: "メモ",
     path: "/memo",
     target: undefined,
