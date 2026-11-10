@@ -43,10 +43,46 @@
   --radius-xl: var(--radius);
 }
 
-/* 黒・白・ライムグリーンの3色のみ(グレーは白の濃淡)。ダーク固定 */
-:root,
-.dark {
+/* 配色は「モード(白背景/黒背景)」×「パレット(ライム/白黒)」。既定は黒背景+ライム */
+
+/* 白背景モード: 白・黒・濃いめのグリーン(白地でも読めるよう明度を落とす) */
+:root {
   --radius: 0rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0.52 0.2 140);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.52 0.2 140);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.55 0.24 27);
+  --border: oklch(0.52 0.2 140 / 45%);
+  --input: oklch(0.52 0.2 140 / 45%);
+  --ring: oklch(0.52 0.2 140);
+  --chart-1: oklch(0.52 0.2 140);
+  --chart-2: oklch(0 0 0);
+  --chart-3: oklch(0.45 0 0);
+  --chart-4: oklch(0.6 0 0);
+  --chart-5: oklch(0.75 0 0);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(0.52 0.2 140);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.52 0.2 140);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.52 0.2 140 / 45%);
+  --sidebar-ring: oklch(0.52 0.2 140);
+}
+
+/* 黒背景モード(既定): 黒・白・ライムグリーン */
+.dark {
   --background: oklch(0 0 0);
   --foreground: oklch(1 0 0);
   --card: oklch(0 0 0);
@@ -80,8 +116,13 @@
   --sidebar-ring: oklch(0.88 0.26 130);
 }
 
-/* 白黒配色: ライムを白に置き換える(フォントはそのまま) */
-html[data-palette="mono"] {
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* 白黒パレット: グリーンを、黒背景では白・白背景では黒に置き換える(フォントはそのまま) */
+html[data-palette="mono"].dark {
   --primary: oklch(1 0 0);
   --accent: oklch(1 0 0);
   --destructive: oklch(0.75 0 0);
@@ -95,9 +136,18 @@ html[data-palette="mono"] {
   --sidebar-ring: oklch(1 0 0);
 }
 
-html[data-palette="mono"] ::selection {
-  background: oklch(1 0 0);
-  color: oklch(0 0 0);
+html[data-palette="mono"]:not(.dark) {
+  --primary: oklch(0 0 0);
+  --accent: oklch(0 0 0);
+  --destructive: oklch(0.4 0 0);
+  --border: oklch(0 0 0 / 25%);
+  --input: oklch(0 0 0 / 25%);
+  --ring: oklch(0 0 0);
+  --chart-1: oklch(0 0 0);
+  --sidebar-primary: oklch(0 0 0);
+  --sidebar-accent: oklch(0 0 0);
+  --sidebar-border: oklch(0 0 0 / 25%);
+  --sidebar-ring: oklch(0 0 0);
 }
 
 html[data-palette="mono"] .excalidraw.theme--dark {
@@ -110,9 +160,14 @@ html[data-palette="mono"] .excalidraw.theme--dark {
   --color-brand-active: #a3a3a3;
 }
 
-::selection {
-  background: oklch(0.88 0.26 130);
-  color: oklch(0 0 0);
+html[data-palette="mono"] .excalidraw:not(.theme--dark) {
+  --color-primary: #000000;
+  --color-primary-darker: #262626;
+  --color-primary-darkest: #404040;
+  --color-primary-light: #e5e5e5;
+  --color-surface-primary-container: #e5e5e5;
+  --color-brand-hover: #262626;
+  --color-brand-active: #404040;
 }
 
 @layer base {

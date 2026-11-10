@@ -1,6 +1,7 @@
 import Link from "next/link"
 import PaletteToggle from "@/components/PaletteToggle"
 import SidebarSlide from "@/components/SidebarSlide"
+import ThemeModeToggle from "@/components/ThemeModeToggle"
 import {
   SidebarContent,
   SidebarFooter,
@@ -35,6 +36,7 @@ export default function Sidebar() {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
+          <ThemeModeToggle />
           <PaletteToggle />
         </SidebarFooter>
       </SidebarPrimitive>

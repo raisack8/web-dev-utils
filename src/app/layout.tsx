@@ -42,8 +42,10 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          forcedTheme="dark"
           defaultTheme="dark"
+          enableSystem={false}
+          // 旧設定(system等)が残っていても黒背景を既定にするため、保存キーを変える
+          storageKey="theme-v2"
           disableTransitionOnChange
         >
           <AppShell>{children}</AppShell>

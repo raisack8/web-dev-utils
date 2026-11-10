@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Excalidraw } from "@excalidraw/excalidraw"
+import { useTheme } from "next-themes"
 import "@excalidraw/excalidraw/index.css"
 import { saveNoteContent } from "@/lib/action/notes"
 
@@ -33,6 +34,7 @@ export default function CanvasEditor({
   noteId: string
   initialContent: string
 }) {
+  const { resolvedTheme } = useTheme()
   const [status, setStatus] = useState<Status>("saved")
   const [initial] = useState(() => parseScene(initialContent))
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -79,7 +81,7 @@ export default function CanvasEditor({
       </div>
       <div className="flex-1 min-h-0">
         <Excalidraw
-          theme="dark"
+          theme={resolvedTheme === "light" ? "light" : "dark"}
           langCode="ja-JP"
           initialData={{
             elements: initial.elements,
